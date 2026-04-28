@@ -278,69 +278,89 @@ export default function App() {
   }, [stats.isPerpendicular, stats.sides, draggingIdx, playSound, activeType]);
 
   return (
-    <div className={`min-h-[100dvh] w-full flex flex-col transition-all duration-700 ${isDark ? 'bg-[#121212] text-zinc-100' : 'bg-zinc-50 text-zinc-900'} safe-area-padding overflow-x-hidden`}>
+    <div style={{ fontFamily: "'NanumSquareRound', 'Nunito', sans-serif" }} className={`min-h-[100dvh] w-full flex flex-col transition-colors duration-700 ${isDark ? 'bg-[#121212] text-zinc-100' : 'bg-[#fffefe] text-zinc-800'} safe-area-padding overflow-x-hidden`}>
       
-      {/* 상단 탭 메뉴 */}
-      <nav className={`w-full shrink-0 border-b ${isDark ? 'border-zinc-800 bg-[#121212]/90' : 'border-zinc-200 bg-white/90'} backdrop-blur-xl z-30 sticky top-0 px-2 py-2 md:px-6 md:py-3`}>
-        <div className="max-w-screen-xl mx-auto flex items-center justify-between gap-1 md:gap-4 w-full">
+      {/* 상단 통합 헤더 */}
+      <header className={`w-full shrink-0 border-b ${isDark ? 'border-zinc-800 bg-[#121212]/90' : 'border-zinc-200/60 bg-[#ffffff]/90'} backdrop-blur-xl z-30 sticky top-0 px-4 py-3 md:px-8 md:py-5 shadow-sm`}>
+        <div className="max-w-screen-xl mx-auto flex flex-col gap-4 md:gap-5 w-full">
           
-          <div className="flex-1 min-w-0 relative flex flex-col items-center">
+          {/* 1. 타이틀 및 보조 버튼 */}
+          <div className="flex items-start md:items-center justify-between w-full">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 md:w-8 md:h-8 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                  <Layers className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                </div>
+                <h1 className={`text-[18px] md:text-[24px] font-black tracking-tight ${isDark ? 'text-emerald-400' : 'text-emerald-500'}`}>
+                  사각형 탐구 연구소
+                </h1>
+              </div>
+              <p className={`text-[12px] md:text-[14px] font-extrabold ml-1 ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                도형을 요리조리 움직이며 성질을 찾아보세요!
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0 ml-2 mt-1 md:mt-0">
+               <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-2.5 md:p-3 rounded-2xl shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 border ${isDark ? 'bg-zinc-800/80 border-white/5 text-zinc-400 hover:bg-zinc-700' : 'bg-white border-zinc-100 text-zinc-500 hover:bg-zinc-50'}`}>
+                  {soundEnabled ? <Volume2 className="w-4 h-4 mx-auto" /> : <VolumeX className="w-4 h-4 mx-auto" />}
+               </button>
+               <button onClick={() => setIsDark(!isDark)} className={`p-2.5 md:p-3 rounded-2xl shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 border ${isDark ? 'bg-zinc-800/80 border-white/5 text-zinc-400 hover:bg-zinc-700' : 'bg-white border-zinc-100 text-zinc-500 hover:bg-zinc-50'}`}>
+                  {isDark ? <Sun className="w-4 h-4 mx-auto" /> : <Moon className="w-4 h-4 mx-auto" />}
+               </button>
+            </div>
+          </div>
+
+          {/* 2. 사각형 선택 메뉴 */}
+          <div className="w-full min-w-0 relative flex flex-col items-center">
             <div className="w-full relative">
               <div 
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex gap-1.5 md:gap-2 overflow-x-auto pb-2 pt-1 no-scrollbar justify-start flex-nowrap scroll-smooth snap-x relative z-10 pr-6" 
+                className="flex gap-2 md:gap-4 overflow-x-auto pb-4 pt-2 no-scrollbar justify-start flex-nowrap scroll-smooth snap-x relative z-10 pr-8" 
                 style={{ scrollBehavior: 'smooth' }}
               >
                  {SHAPE_TYPES.map(shape => (
-                   <button
-                     key={shape.id}
-                     onClick={(e) => { 
-                       setActiveType(shape.id); 
-                       setPoints(DEFAULT_POINTS[shape.id]); 
-                       setShowProperties(false); 
-                       e.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                     }}
-                     className={`whitespace-nowrap px-3 py-1.5 md:px-4 md:py-2.5 rounded-full border-2 text-[12px] md:text-sm font-black transition-all shrink-0 flex items-center gap-1.5 snap-center ${activeType === shape.id 
-                       ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg' 
-                       : isDark ? 'bg-zinc-800 border-transparent text-zinc-400 hover:border-emerald-500' : 'bg-white border-zinc-100 text-zinc-500 hover:border-emerald-300'}`}
-                   >
-                     <span className="text-[13px] md:text-base mb-[1px]">{shape.emoji}</span>
-                     <span className="word-keep-all whitespace-nowrap">{shape.name}</span>
-                   </button>
+                   <div key={shape.id} className="relative flex flex-col items-center shrink-0 snap-center group">
+                     {/* 메뉴별 배경 하이라이트 (시각적 구분 강화) */}
+                     <div className={`absolute -inset-1.5 rounded-[2rem] transition-colors duration-300 -z-10 group-hover:bg-zinc-100 dark:group-hover:bg-zinc-800/50 opacity-0 group-hover:opacity-100`} />
+                     
+                     <button
+                       onClick={(e) => { 
+                         setActiveType(shape.id); 
+                         setPoints(DEFAULT_POINTS[shape.id]); 
+                         setShowProperties(false); 
+                         e.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                       }}
+                       className={`whitespace-nowrap px-4 py-2 md:px-6 md:py-2.5 rounded-full border-2 text-[14px] md:text-[16px] font-black transition-all flex items-center gap-2 focus:outline-none relative ${activeType === shape.id 
+                         ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/30' 
+                         : isDark ? 'bg-zinc-800/60 border-transparent text-zinc-300 hover:text-zinc-100' : 'bg-white border-zinc-100 text-zinc-500 hover:text-zinc-700 shadow-[0_2px_8px_rgba(0,0,0,0.02)]'}`}
+                     >
+                       <span className="text-[16px] md:text-[18px] mb-[1px]">{shape.emoji}</span>
+                       <span className="word-keep-all whitespace-nowrap">{shape.name}</span>
+                     </button>
+                     
+                     {/* 선택된 탭 하단 인디케이터 */}
+                     {activeType === shape.id && (
+                       <motion.div
+                         layoutId="activeShapeTab"
+                         className="absolute -bottom-1.5 h-[6px] w-[80%] bg-emerald-500 rounded-full shadow-[0_2px_6px_rgba(16,185,129,0.4)]"
+                         initial={false}
+                         transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.8 }}
+                       />
+                     )}
+                   </div>
                  ))}
               </div>
 
-              {/* 오른쪽 흐림 효과 (메뉴가 더 있다는 힌트) */}
+              {/* 오른쪽 흐림 효과 */}
               <div 
-                className={`absolute right-0 top-0 bottom-2 w-12 pointer-events-none transition-opacity duration-300 z-20 bg-gradient-to-l ${isDark ? 'from-[#121212] to-transparent' : 'from-white to-transparent'}`}
+                className={`absolute right-0 top-0 bottom-2 w-16 pointer-events-none transition-opacity duration-300 z-20 bg-gradient-to-l ${isDark ? 'from-[#121212] to-transparent' : 'from-[#fffefe] to-transparent'}`}
                 style={{ opacity: scrollProgress < 0.95 ? 1 : 0 }}
               />
             </div>
-
-            {/* 스크롤 상태 바 */}
-            <div className="h-[3px] w-16 md:w-24 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden relative mt-1">
-              <motion.div 
-                 className="absolute top-0 bottom-0 left-0 bg-emerald-500 rounded-full"
-                 animate={{ x: `${scrollProgress * 200}%` }} // width 33% relative to 100%, total travel 200% gives 66.6%. we'll just fix styles
-                 style={{ width: '33.3%' }}
-                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              />
-            </div>
           </div>
-
-          {/* 우측 보조 기능 버튼들 */}
-          <div className="flex items-center gap-1.5 shrink-0 pl-2 border-l border-zinc-200 dark:border-white/10 ml-1 self-start mt-1">
-             <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-1.5 md:p-2 rounded-lg border transition-all ${isDark ? 'bg-zinc-800 border-white/10 text-zinc-400 hover:bg-zinc-700' : 'bg-white border-zinc-200 text-zinc-500 hover:bg-zinc-100'}`}>
-                {soundEnabled ? <Volume2 className="w-3.5 h-3.5 md:w-4 md:h-4" /> : <VolumeX className="w-3.5 h-3.5 md:w-4 md:h-4" />}
-             </button>
-             <button onClick={() => setIsDark(!isDark)} className={`p-1.5 md:p-2 rounded-lg border transition-all ${isDark ? 'bg-zinc-800 border-white/10 text-zinc-400 hover:bg-zinc-700' : 'bg-white border-zinc-200 text-zinc-500 hover:bg-zinc-100'}`}>
-                {isDark ? <Sun className="w-3.5 h-3.5 md:w-4 md:h-4" /> : <Moon className="w-3.5 h-3.5 md:w-4 md:h-4" />}
-             </button>
-          </div>
-
         </div>
-      </nav>
+      </header>
 
       {/* 메인 탐구 영역 */}
       <main ref={containerRef} className="flex-1 relative flex flex-col min-h-0 bg-transparent">
@@ -511,20 +531,22 @@ export default function App() {
 
 
         {/* 하단 정보창 */}
-        <div className="shrink-0 p-4 pb-6 md:pb-8 flex flex-col items-center gap-4 z-20">
-           <div className={`px-5 py-3 md:px-6 md:py-4 rounded-[2rem] backdrop-blur-2xl border flex flex-wrap justify-center gap-4 md:gap-6 text-[13px] md:text-sm font-black shadow-2xl transition-all ${isDark ? 'bg-zinc-900/90 border-white/10' : 'bg-white/90 border-zinc-200'}`}>
-              <div className="flex items-center gap-2 md:gap-2.5">
-                <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
-                <span className="word-keep-all whitespace-nowrap font-bold">색깔이 같으면 값도 같아요</span>
+        <div className="shrink-0 p-4 pb-6 md:pb-10 flex flex-col items-center gap-4 z-20">
+           <div className={`px-5 py-3.5 md:px-8 md:py-5 rounded-full backdrop-blur-2xl border-2 flex flex-wrap justify-center items-center gap-4 md:gap-8 text-[14px] md:text-[16px] font-black shadow-2xl transition-all ${isDark ? 'bg-zinc-900/90 border-zinc-800' : 'bg-white/90 border-emerald-100 hover:border-emerald-200'}`}>
+              <div className="flex items-center gap-2.5 md:gap-3">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+                <span className={`word-keep-all whitespace-nowrap ${isDark ? 'text-zinc-200' : 'text-zinc-700'}`}>
+                  색깔이 같으면 값도 같아요
+                </span>
               </div>
-              <div className={`w-px h-4 hidden sm:block ${isDark ? 'bg-white/10' : 'bg-zinc-200'}`} />
-              <div className="flex items-center gap-2 md:gap-2.5">
+              <div className={`w-1.5 h-1.5 rounded-full hidden sm:block ${isDark ? 'bg-zinc-700' : 'bg-emerald-200'}`} />
+              <div className="flex items-center gap-2.5 md:gap-3">
                 <button 
                    onClick={() => { setPoints(DEFAULT_POINTS[activeType]); setShowProperties(false); }}
-                   className="flex items-center gap-1.5 md:gap-2 text-zinc-400 hover:text-emerald-500 transition-all font-black active:scale-95 px-2"
+                   className="flex items-center gap-2 md:gap-2.5 text-zinc-400 hover:text-emerald-500 transition-all font-black active:scale-95 px-3 py-1.5 rounded-2xl hover:bg-emerald-50 dark:hover:bg-zinc-800"
                 >
-                  <RotateCcw className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  <span className="word-keep-all whitespace-nowrap font-bold">다시 그리기</span>
+                  <RotateCcw className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="word-keep-all whitespace-nowrap">다시 그리기</span>
                 </button>
               </div>
            </div>
@@ -532,6 +554,14 @@ export default function App() {
       </main>
 
       <style>{`
+        @font-face {
+          font-family: 'NanumSquareRound';
+          src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRound.woff') format('woff');
+          font-weight: 400 900;
+          font-style: normal;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+        
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .word-keep-all { word-break: keep-all; }
