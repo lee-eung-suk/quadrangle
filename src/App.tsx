@@ -90,21 +90,50 @@ function solveConstraints(type: ShapeType, pts: Point[], dragIdx: number, newPos
     else if (dragIdx === 2) { next[0].x = pts[1].x + pts[3].x - tx; next[0].y = pts[1].y + pts[3].y - ty; }
     else if (dragIdx === 3) { next[1].x = pts[0].x + pts[2].x - tx; next[1].y = pts[0].y + pts[2].y - ty; }
   } else if (type === 'rhombus') {
-    const center = { x: 400, y: 350 };
+    const center = {
+      x: (pts[0].x + pts[1].x + pts[2].x + pts[3].x) / 4,
+      y: (pts[0].y + pts[1].y + pts[2].y + pts[3].y) / 4
+    };
     const dist = getDistance(center, { x: tx, y: ty });
     const angle = Math.atan2(ty - center.y, tx - center.x);
-    if (dragIdx % 2 === 0) {
-      next[0] = { ...next[0], x: center.x + Math.cos(angle) * dist, y: center.y + Math.sin(angle) * dist };
-      next[2] = { ...next[2], x: center.x - Math.cos(angle) * dist, y: center.y - Math.sin(angle) * dist };
-    } else {
-      next[1] = { ...next[1], x: center.x + Math.cos(angle) * dist, y: center.y + Math.sin(angle) * dist };
-      next[3] = { ...next[3], x: center.x - Math.cos(angle) * dist, y: center.y - Math.sin(angle) * dist };
-    }
+    
+    const main1 = dragIdx;
+    const main2 = (dragIdx + 2) % 4;
+    const oth1 = (dragIdx + 1) % 4;
+    const oth2 = (dragIdx + 3) % 4;
+
+    next[main1] = { ...next[main1], x: tx, y: ty };
+    next[main2] = { ...next[main2], x: center.x - Math.cos(angle) * dist, y: center.y - Math.sin(angle) * dist };
+    
+    const otherDist = getDistance(center, pts[oth1]);
+    const otherAngle = angle + Math.PI / 2;
+    next[oth1] = { ...next[oth1], x: center.x + Math.cos(otherAngle) * otherDist, y: center.y + Math.sin(otherAngle) * otherDist };
+    next[oth2] = { ...next[oth2], x: center.x - Math.cos(otherAngle) * otherDist, y: center.y - Math.sin(otherAngle) * otherDist };
   } else if (type === 'trapezoid') {
     next[dragIdx] = { ...next[dragIdx], x: tx, y: ty };
     if (dragIdx === 0 || dragIdx === 1) { next[0].y = next[1].y = ty; }
     else { next[2].y = next[3].y = ty; }
   }
+
+  const checkConvex = (p: Point[]) => {
+    let sign = 0;
+    for (let i = 0; i < 4; i++) {
+      const p1 = p[i];
+      const p2 = p[(i + 1) % 4];
+      const p3 = p[(i + 2) % 4];
+      const cp = (p2.x - p1.x) * (p3.y - p2.y) - (p2.y - p1.y) * (p3.x - p2.x);
+      if (Math.abs(cp) < 100) return false;
+      const curSign = Math.sign(cp);
+      if (sign === 0) sign = curSign;
+      else if (curSign !== sign) return false;
+    }
+    return true;
+  };
+
+  if (!checkConvex(next)) {
+    return pts;
+  }
+
   return next;
 }
 
